@@ -1,254 +1,129 @@
-# 🏦 Console-Based Banking System in C++
 
-This project is a **Bank Teller Management & Authentication System**, designed as a simple console-based application in C++. It allows bank tellers to register, log in, and access features based on their permissions.
+# 🏦 MNW Banking System (Console-based C++ Project)
 
----
-
-## 📋 Features
-
-- ✅ Bank Teller Sign-Up (with auto or custom password)
-- ✅ Login with secure retry system (up to 4 attempts)
-- ✅ Bitmask-based permission system
-- ✅ Main menu navigation
-- ✅ Color-coded interface for enhanced user experience
-- ✅ Input validation and basic error handling
+This is a simple banking system written in C++ that simulates basic teller functionalities, including client management and user authentication with permission handling.
 
 ---
 
-## 🧾 Main Functionalities
+## 📂 Features
 
-- **Authentication System**:
-  - Sign up new bank tellers
-  - Check for duplicate IDs
-  - Login with retry logic
-- **Permissions**:
-  - Bitmask encoding for managing access to:
-    - Show client list
-    - Add/update/delete client
-    - View transactions
-- **Navigation**:
-  - After login, user accesses the main menu
-  - System is modular and supports further extensions
+### 🔐 Authentication System
+- **Login & Sign-Up**
+- Teller authentication using ID and password.
+- Recommended password generation for new users.
+- Full or custom access rights via a permission system.
+
+### 👨‍💼 Teller Permissions
+Tellers can be assigned specific permissions such as:
+- View client list
+- Add a new client
+- Delete client
+- Update client information
+- Find client
+- Perform transactions
+
+Permissions are stored as an integer bitmask (e.g., `1` for view, `2` for add, etc.).
+
+### 📋 Client Management
+- View a list of all clients
+- Add a new client with details
+- Delete a client by account number
+- Update client information
+- Find a client by account number
+
+### 💰 Transactions
+- Deposit and withdrawal for any client by account number.
+- Show all balances.
+
+### 📁 File Storage
+- All data (clients and bank tellers) is stored in files using custom delimiters.
+- Files are parsed and serialized manually (no database used).
 
 ---
 
-## 🛠️ Technologies
-
-- Language: **C++**
-- Libraries used:
-  - `<iostream>`
-  - `<vector>`
-  - `<string>`
-  - `<limits>`
-  - `<ctime>`
-  - (Assumed: custom helper functions for file handling like `ReadFileContent()`)
+## 🛠 Technologies Used
+- **C++** (Procedural style)
+- **File handling**
+- **Vectors and Structs**
+- **Console I/O and UI coloring (using `system("color")`)**
+- **Basic security (ID/password login with retry limit)**
 
 ---
 
-## 📁 Code
+## 🔧 How It Works
 
-```cpp
-// --- Main Menu Handling ---
-case enMainMenuChoice::eExit:
-    system("cls");
-    AuthenticationWindow();
-    break;
+### Startup Flow
+```bash
+AuthenticationWindow() -> Login or Sign Up -> ShowMainMenuScreen() -> ChoiceImplement()
+```
 
-// --- Show Menu ---
-void ShowMainMenuScreen(stBankTellersData banktellertocheck) {
-    system("color 07");
-    system("cls");
-    cout << "==========================================================\n";
-    cout << "\t\tMain Menu Screen\n";
-    cout << "==========================================================\n";
-    cout << "\t[1] Show Client List.\n";
-    cout << "\t[2] Add New Client.\n";
-    cout << "\t[3] Delete Client.\n";
-    cout << "\t[4] Update Client Info.\n";
-    cout << "\t[5] Find Client.\n";
-    cout << "\t[6] Transactions.\n";
-    cout << "\t[7] Log Out.\n";
-    cout << "==========================================================\n";
-    cout << "Choose What Do you want to do? [1 to 7]?";
+### File Handling
+Files are used to persist:
+- Teller data (`FileName2`)
+- Client data (`FileName`)
 
-    short choice=0;
-    choice = ReadIntNumberBetween(1, 7);
-    ChoiceImplement(enMainMenuChoice(choice), banktellertocheck);
-}
+Each line in the file is parsed using a `#//#` delimiter and loaded into memory as a vector of structs.
 
-// --- Enums ---
-enum eChosingAuth {
-    eLogin = 1,
-    eSignIn = 2,
-    eExit2 = 3
-};
+---
 
-// --- Login ---
-bool LoginProcess(stBankTellersData &banktellertocheck) {
-    string Id;
-    vector<stBankTellersData> vbanktellersdata = ReadFileContent(FileName2, "#//#");
+## 📜 Sample Permissions Mapping
 
-    cout << "Enter Id: ";
-    getline(cin >> ws, Id);
+| Action            | Bitmask Value |
+|-------------------|---------------|
+| Show Clients      | 1             |
+| Add Client        | 2             |
+| Delete Client     | 4             |
+| Update Client     | 8             |
+| Find Client       | 16            |
+| Transactions      | 32            |
 
-    while (!checkBankTellersexistance(vbanktellersdata, banktellertocheck, Id)) {
-        system("color E0");
-        cout << "Id not found, please try again.\n";
-        cout << "Enter Id: ";
-        getline(cin >> ws, Id);
-    }
+---
 
-    for (int i = 3; i >= 0; i--) {
-        cout << "Enter Password: ";
-        string pass;
-        getline(cin >> ws, pass);
+## 🧑‍💻 Functions Overview
 
-        if (pass == banktellertocheck.Password) {
-            cout << "\n\t\t\tHELLO MASTER " << banktellertocheck.name << endl;
-            system("color 27");
-            cout << "please enter any key to continue\n";
-            system("pause>0");
-            return true;
-        }
+### Authentication Functions
+- `LoginWindow()`
+- `LoginProcess()`
+- `SignInWindow()`
+- `SignInProcess()`
+- `PermissionsCheck()`
 
-        if (i > 0)
-            cout << "Wrong password, you have " << i << " tries left.\n";
-    }
+### Core Menu Logic
+- `ShowMainMenuScreen()`
+- `ChoiceImplement()`
+- `AuthenticationWindow()`
+- `AuthenticationImplementation()`
 
-    return false;
-}
+### Client Functions
+- `ShowClientList()`
+- `AddClient()`
+- `DeleteClient()`
+- `UpdateClientInfo()`
+- `FindClient()`
 
-// --- Login Window ---
-void LoginWindow() {
-    system("cls");
-    cout << "\n-------------------------------------------\n";
-    cout << "            LOGIN TO YOUR ACCOUNT\n";
-    cout << "-------------------------------------------\n";
-    stBankTellersData banktellertocheck;
-    if (LoginProcess(banktellertocheck)) {
-        ShowMainMenuScreen(banktellertocheck);
-    } else {
-        cout << "failed login!, try another time.\n";
-    }
-}
+### Transactions
+- `DepositMoney()`
+- `WithdrawMoney()`
+- `ShowAllBalances()`
 
-// --- Permissions ---
-int PermissionsCheck() {
-    int permissions = 0;
-    char choice;
-    cout << "Do You Want To give access to :\n\n";
+---
 
-    cout << "Show Client List? y/n? "; cin >> choice;
-    if (tolower(choice) == 'y') permissions += 1;
+## ▶ How to Run
 
-    cout << "Add New Client? y/n? "; cin >> choice;
-    if (tolower(choice) == 'y') permissions += 2;
+1. Make sure you have a C++ compiler installed (e.g., `g++`).
+2. Compile the code:
+   ```bash
+   g++ main.cpp -o BankSystem
+   ```
+3. Run the application:
+   ```bash
+   ./BankSystem
+   ```
 
-    cout << "Delete Client? y/n? "; cin >> choice;
-    if (tolower(choice) == 'y') permissions += 4;
+---
 
-    cout << "Update Client? y/n? "; cin >> choice;
-    if (tolower(choice) == 'y') permissions += 8;
+## 📝 Notes
 
-    cout << "Find Client? y/n? "; cin >> choice;
-    if (tolower(choice) == 'y') permissions += 16;
-
-    cout << "Transactions? y/n? "; cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    if (tolower(choice) == 'y') permissions += 32;
-
-    return permissions;
-}
-
-// --- Sign Up Process ---
-void SignInProcess() {
-    stBankTellersData NewBankTeller;
-    cout << "Enter Id: ";
-    getline(cin >> ws, NewBankTeller.Id);
-
-    vector<stBankTellersData> vbanktellers = ReadFileContent(FileName2, "#//#");
-    while (checkBankTellersexistance(vbanktellers, NewBankTeller.Id)) {
-        cout << "THE ID ALREADY EXISTS\n";
-        cout << "Please enter another id\n";
-        getline(cin >> ws, NewBankTeller.Id);
-    }
-
-    cout << "Enter Name: ";
-    getline(cin, NewBankTeller.name);
-
-    cout << "Enter Password <do you want us to recommend a password?> y/n ? : ";
-    char choice;
-    cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    if (tolower(choice) == 'y') {
-        NewBankTeller.Password = GenerateKey(enCharType::MixChars);
-        cout << "Your password is: " << NewBankTeller.Password << endl;
-    } else {
-        cout << "ENTER PASSWORD: ";
-        getline(cin, NewBankTeller.Password);
-    }
-
-    cout << "Do You Want To Give Full Access? y/n ? ";
-    cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    if (tolower(choice) == 'n') {
-        NewBankTeller.Permissions = PermissionsCheck();
-    }
-
-    vbanktellers.push_back(NewBankTeller);
-    cout << "\nYour registration was done successfully, thank you for your patience\n";
-    AddBankTellersToFile(vbanktellers);
-
-    cout << "\nPlease press any key to continue...\n";
-    cin.get();
-}
-
-// --- Sign Up Window ---
-void SignInWindow() {
-    cout << "\n-------------------------------------------\n";
-    cout << "            SIGN UP MENU\n";
-    cout << "-------------------------------------------\n\n";
-    SignInProcess();
-}
-
-// --- Authentication Logic ---
-void AuthenticationImplementation(eChosingAuth eChoice) {
-    if (eChoice == eChosingAuth::eLogin) {
-        system("cls");
-        LoginWindow();
-    } else if (eChoice == eChosingAuth::eSignIn) {
-        system("cls");
-        SignInWindow();
-        LoginWindow(); // Optional: prompt user to log in again
-    } else if (eChoice == eChosingAuth::eExit2) {
-        system("cls");
-        programends();
-    }
-}
-
-// --- Authentication Window ---
-void AuthenticationWindow() {
-    int choice;
-    cout << "===========================================\n";
-    cout << "         WELCOME TO MNW BANK SYSTEM\n";
-    cout << "===========================================\n";
-    cout << "    [1] Login\n";
-    cout << "    [2] Sign up new bank teller\n";
-    cout << "    [3] Exit\n";
-    cout << "-------------------------------------------\n";
-    cout << "Enter your choice: ";
-    choice = ReadIntNumberBetween(1, 3);
-    AuthenticationImplementation(eChosingAuth(choice));
-}
-
-// --- Main Entry ---
-int main() {
-    srand((unsigned)time(NULL));
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
-    AuthenticationWindow();
-    system("pause>0");
-    return 0;
-}
+- The program uses `system("cls")` and `system("color")`, so it’s intended for Windows console environments.
+- No GUI or OOP concepts are used; this project is purely functional/procedural with text-based navigation.
+- Ideal for learning file operations and access control in C++.
